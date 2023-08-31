@@ -2,26 +2,81 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+@font-face {
+    font-family: "Apple SD Gothic Neo";
+    font-weight: 100;
+    src: url("/asset/fonts/AppleSDGothicNeo/AppleSDGothicNeo_100.woff2")
+        format(".woff2");
+}
+@font-face {
+    font-family: "Apple SD Gothic Neo";
+    font-weight: 200;
+    src: url("/asset/fonts/AppleSDGothicNeo/AppleSDGothicNeo_200.woff2")
+        format("woff2");
+}
+@font-face {
+    font-family: "Apple SD Gothic Neo";
+    font-weight: 300;
+    src: url("/asset/fonts/AppleSDGothicNeo/AppleSDGothicNeo_300.woff2")
+        format(".woff2");
+}
+@font-face {
+    font-family: "Apple SD Gothic Neo";
+    font-weight: 400;
+    src: url("/public/asset/fonts/AppleSDGothicNeo/AppleSDGothicNeo_400.woff2")
+        format(".woff2");
+}
+@font-face {
+    font-family: "Apple SD Gothic Neo";
+    font-weight: 500;
+    src: url("/asset/fonts/AppleSDGothicNeo/AppleSDGothicNeo_500.woff2")
+        format(".woff2");
+}
+@font-face {
+    font-family: "Apple SD Gothic Neo";
+    font-weight: 600;
+    src: url("/asset/fonts/AppleSDGothicNeo/AppleSDGothicNeo_600.woff2")
+        format(".woff2");
+}
+@font-face {
+    font-family: "Apple SD Gothic Neo";
+    font-weight: 700;
+    src: url("/asset/fonts/AppleSDGothicNeo/AppleSDGothicNeo_700.woff2")
+        format(".woff2");
+}
+@font-face {
+    font-family: "Apple SD Gothic Neo";
+    font-weight: 800;
+    src: url("/asset/fonts/AppleSDGothicNeo/AppleSDGothicNeo_800.woff2")
+        format(".woff2");
+}
+@font-face {
+    font-family: "Apple SD Gothic Neo";
+    font-weight: 900;
+    src: url("/asset/fonts/AppleSDGothicNeo/AppleSDGothicNeo_900.woff2")
+        format(".woff2");
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+@font-face {
+    font-family: "Black Han Sans";
+    font-weight: 900;
+    src: url("/asset/fonts/blackHanSans/BlackHanSans-Regular.ttf")
+        format(".tff");
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+.scrollbar {
+    overflow: overlay;
+}
+
+.scrollbar::-webkit-scrollbar {
+    width: 0.7vw;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsla(0, 0%, 42%, 0.4);
+    border-radius: 100px;
+}
+
+div {
+    box-sizing: border-box;
 }
