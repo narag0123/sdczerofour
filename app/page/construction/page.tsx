@@ -4,7 +4,7 @@ const Construction = () => {
     return (
         <main className="construction flex-[0.8] bg-[#ffffff] rounded-[20px] p-[40px] scrollbar h-[calc(100vh-130px)]">
             <h1 className="font-nl text-[20px] font-black h-[80px]">
-                공사 등록하기
+                공사 등록하기1
             </h1>
             <form
                 action="http://localhost:8081/api/v1/page/construction"
@@ -285,6 +285,7 @@ const Construction = () => {
                     </div>
                 </div>
                 {/* 공사 내용 */}
+                {/* TODO - 이미지 input받아야함 */}
                 <div className="border-t-[0.5px] border-t-[#D7D7D7] flex py-[15px] pb-[30px]">
                     <h2 className="flex-[0.25] font-nl font-[700] text-[18px]">
                         공사 내용
