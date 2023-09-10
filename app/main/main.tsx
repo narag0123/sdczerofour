@@ -184,7 +184,7 @@ const Main = () => {
             {/* 메인 3열 */}
             <div className="w-full">
                 {/* 최근 발생 건 */}
-                <div className="w-full h-[200px] bg-[#FDFDFD] rounded-[20px] scrollbar py-[20px] px-[30px]">
+                <div className="w-full h-[calc(100vh-690px)] bg-[#FDFDFD] rounded-[20px] scrollbar py-[20px] px-[30px]">
                     <h1 className="font-nl font-black text-[20px] mb-[10px]">
                         최근 발생 건
                     </h1>
@@ -215,6 +215,70 @@ const Main = () => {
                                 <td>08:00</td>
                                 <td>준설 공사</td>
                                 <td>일시 정지</td>
+                            </tr>
+                            <tr className="h-[45px]">
+                                <td>김기태</td>
+                                <td>둔촌터널</td>
+                                <td>2023.10.10</td>
+                                <td>08:00</td>
+                                <td>준설 공사</td>
+                                <td>종료</td>
+                            </tr>
+                            <tr className="h-[45px]">
+                                <td>김기태</td>
+                                <td>둔촌터널</td>
+                                <td>2023.10.10</td>
+                                <td>08:00</td>
+                                <td>준설 공사</td>
+                                <td>종료</td>
+                            </tr>
+                            <tr className="h-[45px]">
+                                <td>김기태</td>
+                                <td>둔촌터널</td>
+                                <td>2023.10.10</td>
+                                <td>08:00</td>
+                                <td>준설 공사</td>
+                                <td>종료</td>
+                            </tr>
+                            <tr className="h-[45px]">
+                                <td>김기태</td>
+                                <td>둔촌터널</td>
+                                <td>2023.10.10</td>
+                                <td>08:00</td>
+                                <td>준설 공사</td>
+                                <td>종료</td>
+                            </tr>
+                            <tr className="h-[45px]">
+                                <td>김기태</td>
+                                <td>둔촌터널</td>
+                                <td>2023.10.10</td>
+                                <td>08:00</td>
+                                <td>준설 공사</td>
+                                <td>종료</td>
+                            </tr>
+                            <tr className="h-[45px]">
+                                <td>김기태</td>
+                                <td>둔촌터널</td>
+                                <td>2023.10.10</td>
+                                <td>08:00</td>
+                                <td>준설 공사</td>
+                                <td>종료</td>
+                            </tr>
+                            <tr className="h-[45px]">
+                                <td>김기태</td>
+                                <td>둔촌터널</td>
+                                <td>2023.10.10</td>
+                                <td>08:00</td>
+                                <td>준설 공사</td>
+                                <td>종료</td>
+                            </tr>
+                            <tr className="h-[45px]">
+                                <td>김기태</td>
+                                <td>둔촌터널</td>
+                                <td>2023.10.10</td>
+                                <td>08:00</td>
+                                <td>준설 공사</td>
+                                <td>종료</td>
                             </tr>
                             <tr className="h-[45px]">
                                 <td>김기태</td>

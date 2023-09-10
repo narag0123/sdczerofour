@@ -48,7 +48,7 @@ const NavUnitItems: React.FC = () => {
                                 : e.image
                         }
                         alt={"e.image"}
-                        className="w-[18px]"
+                        className="w-[18px] object-cover"
                         width={18}
                         height={18}
                     />

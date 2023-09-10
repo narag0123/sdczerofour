@@ -1,4 +1,4 @@
-import React from "react";
+import { UseContext } from "@/app/store/store";
 
 const AccRecord = () => {
     return <div>AccRecord</div>;
