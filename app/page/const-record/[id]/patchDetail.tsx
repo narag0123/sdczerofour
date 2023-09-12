@@ -1,6 +1,7 @@
 "use client";
 import { UseContext } from "@/app/store/store";
 import React, {
+    FormEventHandler,
     useContext,
     useEffect,
     useState,
@@ -9,23 +10,53 @@ import Calendar from "react-calendar";
 // import "react-calendar/dist/Calendar.css"; // css import
 import { IntlProvider } from "react-intl";
 import { format } from "date-fns";
+import { useRouter } from "next/navigation";
 
-var localStorage: string;
-const locale: string = "";
+type getData = {
+    id: number;
+    writer: string;
+    dispatch: string;
+    region: string;
+    place: string;
+    placeDetail: string;
+    startDate: string;
+    startTime: string;
+    endDate: string;
+    endTime: string;
+    company: string;
+    commander: string;
+    workers: string;
+    equipment: string;
+    content: string;
+};
 
-const ConstInputForm = () => {
+type Props = {
+    data?: getData;
+    lastURL: string;
+    setMode: React.Dispatch<React.SetStateAction<string>>;
+};
+
+type ValuePiece = Date | null;
+type Value = ValuePiece | [ValuePiece, ValuePiece];
+
+const PatchDetail: React.FC<Props> = ({
+    data,
+    lastURL,
+    setMode,
+}) => {
     const context = useContext(UseContext);
     const { tunnel } = context;
+    const router = useRouter();
     const [regionValue, setRegionValue] =
         useState<string>("분당구");
     const [placeValue, setPlaceValue] = useState<string[]>([
         "광장 지하차도",
     ]);
 
-    const [startDate, setStartDate] = useState<Date | any>(
+    const [startDate, setStartDate] = useState<Value | any>(
         new Date()
     );
-    const [endDate, setEndDate] = useState<Date | any>(
+    const [endDate, setEndDate] = useState<Value | any>(
         new Date()
     );
     const [toggleCalendar, setToggleCalendar] = useState<{
@@ -34,6 +65,23 @@ const ConstInputForm = () => {
     }>({
         tgStd: false,
         tgEnd: false,
+    });
+    const [patchData, setPatchData] = useState<getData>({
+        id: parseInt(lastURL),
+        writer: "",
+        dispatch: "",
+        region: "",
+        place: "",
+        placeDetail: "",
+        startDate: "",
+        startTime: "",
+        endDate: "",
+        endTime: "",
+        company: "",
+        commander: "",
+        workers: "",
+        equipment: "",
+        content: "",
     });
 
     useEffect(() => {
@@ -51,12 +99,59 @@ const ConstInputForm = () => {
         regionHandler();
     }, [regionValue]);
 
+    const onChangeHandler = (
+        e: React.ChangeEvent<
+            | HTMLInputElement
+            | HTMLSelectElement
+            | HTMLTextAreaElement
+        >
+    ) => {
+        const { name, value } = e.target;
+        setPatchData({
+            ...patchData,
+            [name]: value,
+            region: regionValue,
+            startDate: format(startDate, "yyyy-MM-dd"),
+            endDate: format(endDate, "yyyy-MM-dd"),
+        });
+
+        console.log(patchData);
+    };
+    const patchHandler = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const confirm =
+            window.confirm("수정 하시겠습니까?");
+        if (confirm) {
+            try {
+                const res = await fetch(
+                    `http://localhost:8081/api/v1/page/const-record/${lastURL}`,
+                    {
+                        method: "PATCH",
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+                        },
+                        body: JSON.stringify(patchData),
+                    }
+                );
+                const result = await res.json();
+
+                if (res.ok) {
+                    window.location.reload();
+                } else {
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    };
+
+    // TODO : 모든 input과 selector patchData / patchHandler처리
+
     return (
         <>
-            <form
-                action="http://localhost:8081/api/v1/page/construction"
-                method="post"
-            >
+            <form onSubmit={patchHandler}>
                 {/* 출동정보 */}
                 <div className="border-t-[0.5px] border-t-[#D7D7D7] flex pt-[15px] pb-[30px]">
                     <h2 className="flex-[0.25] font-nl font-[700] text-[18px]">
@@ -66,6 +161,13 @@ const ConstInputForm = () => {
                     <div className="flex-[0.75] flex flex-col gap-[30px]">
                         {/* 1열 */}
                         <div className="flex w-full gap-[20px] row1">
+                            <input
+                                hidden
+                                readOnly
+                                id="id"
+                                name="id"
+                                value={lastURL}
+                            />
                             <div className="input-unit flex flex-col w-[300px] gap-[5px]">
                                 <label
                                     htmlFor="writer"
@@ -74,9 +176,15 @@ const ConstInputForm = () => {
                                     작성자
                                 </label>
                                 <input
-                                    placeholder="이름"
+                                    placeholder={
+                                        data?.writer
+                                    }
                                     id="writer"
                                     name="writer"
+                                    onChange={
+                                        onChangeHandler
+                                    }
+                                    value={patchData.writer}
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
                             </div>
@@ -88,9 +196,19 @@ const ConstInputForm = () => {
                                     출동인원
                                 </label>
                                 <input
-                                    placeholder="이름1, 이름2, 이름3"
+                                    placeholder={
+                                        data?.dispatch ===
+                                        ""
+                                            ? "없음"
+                                            : data?.dispatch
+                                    }
                                     id="dispatch"
-                                    // 수정
+                                    onChange={
+                                        onChangeHandler
+                                    }
+                                    value={
+                                        patchData.dispatch
+                                    }
                                     name="dispatch"
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
@@ -106,7 +224,6 @@ const ConstInputForm = () => {
                                     지역
                                 </label>
                                 <select
-                                    placeholder="이름"
                                     id="region"
                                     name="region"
                                     onChange={(e) => {
@@ -142,9 +259,11 @@ const ConstInputForm = () => {
                                     위치
                                 </label>
                                 <select
-                                    placeholder="이름"
                                     id="place"
                                     name="place"
+                                    onChange={
+                                        onChangeHandler
+                                    }
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                     defaultValue={
                                         "화랑 지하차도"
@@ -175,9 +294,20 @@ const ConstInputForm = () => {
                                     위치 추가 설명
                                 </label>
                                 <input
-                                    placeholder="서울방향 출구부 1차선"
+                                    placeholder={
+                                        data?.dispatch ===
+                                        ""
+                                            ? "작성된 내용이 없습니다"
+                                            : data?.dispatch
+                                    }
                                     id="placeDetail"
                                     name="placeDetail"
+                                    value={
+                                        patchData.placeDetail
+                                    }
+                                    onChange={
+                                        onChangeHandler
+                                    }
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
                             </div>
@@ -221,19 +351,30 @@ const ConstInputForm = () => {
                                 {/* TODO : 캘린더 숫자 클릭하면 다시 사라지게 */}
                                 {/* 캘린더 */}
                                 {toggleCalendar.tgStd && (
-                                    <IntlProvider
-                                        locale={"en"}
+                                    <div
+                                        onClick={() => {
+                                            setToggleCalendar(
+                                                {
+                                                    ...toggleCalendar,
+                                                    tgStd: !toggleCalendar.tgStd,
+                                                }
+                                            );
+                                        }}
                                     >
-                                        <Calendar
-                                            locale="en"
-                                            onChange={
-                                                setStartDate
-                                            }
-                                            value={
-                                                startDate
-                                            }
-                                        />
-                                    </IntlProvider>
+                                        <IntlProvider
+                                            locale={"en"}
+                                        >
+                                            <Calendar
+                                                locale="en"
+                                                onChange={
+                                                    setStartDate
+                                                }
+                                                value={
+                                                    startDate
+                                                }
+                                            />
+                                        </IntlProvider>
+                                    </div>
                                 )}
                             </div>
                             <div className="input-unit flex flex-col w-[300px] gap-[5px]">
@@ -246,8 +387,13 @@ const ConstInputForm = () => {
                                 <input
                                     placeholder="08:00"
                                     id="startTime"
-                                    // 수정
                                     name="startTime"
+                                    onChange={
+                                        onChangeHandler
+                                    }
+                                    value={
+                                        patchData.startTime
+                                    }
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
                             </div>
@@ -278,17 +424,30 @@ const ConstInputForm = () => {
                                     className="cursor-pointer h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
                                 {toggleCalendar.tgEnd && (
-                                    <IntlProvider
-                                        locale={"en"}
+                                    <div
+                                        onClick={() => {
+                                            setToggleCalendar(
+                                                {
+                                                    ...toggleCalendar,
+                                                    tgEnd: !toggleCalendar.tgEnd,
+                                                }
+                                            );
+                                        }}
                                     >
-                                        <Calendar
-                                            locale="en"
-                                            onChange={
-                                                setEndDate
-                                            }
-                                            value={endDate}
-                                        />
-                                    </IntlProvider>
+                                        <IntlProvider
+                                            locale={"en"}
+                                        >
+                                            <Calendar
+                                                locale="en"
+                                                onChange={
+                                                    setEndDate
+                                                }
+                                                value={
+                                                    endDate
+                                                }
+                                            />
+                                        </IntlProvider>
+                                    </div>
                                 )}
                             </div>
                             <div className="input-unit flex flex-col w-[300px] gap-[5px]">
@@ -302,12 +461,16 @@ const ConstInputForm = () => {
                                     placeholder="17:00"
                                     id="endTime"
                                     name="endTime"
+                                    onChange={
+                                        onChangeHandler
+                                    }
+                                    value={
+                                        patchData.endTime
+                                    }
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
                             </div>
                         </div>
-
-                        {/* <button>버튼임</button> */}
                     </div>
                 </div>
                 {/* 업체 정보 */}
@@ -330,6 +493,12 @@ const ConstInputForm = () => {
                                     placeholder="ABC 테크"
                                     id="company"
                                     name="company"
+                                    onChange={
+                                        onChangeHandler
+                                    }
+                                    value={
+                                        patchData.company
+                                    }
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
                             </div>
@@ -344,6 +513,12 @@ const ConstInputForm = () => {
                                     placeholder="김공사 과장 (010-1234-5678)"
                                     id="commander"
                                     name="commander"
+                                    onChange={
+                                        onChangeHandler
+                                    }
+                                    value={
+                                        patchData.commander
+                                    }
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
                             </div>
@@ -361,6 +536,12 @@ const ConstInputForm = () => {
                                     placeholder="3명"
                                     id="workers"
                                     name="workers"
+                                    onChange={
+                                        onChangeHandler
+                                    }
+                                    value={
+                                        patchData.workers
+                                    }
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
                             </div>
@@ -374,7 +555,12 @@ const ConstInputForm = () => {
                                 <input
                                     placeholder="고소작업차 2대"
                                     id="equipment"
-                                    // 수정
+                                    onChange={
+                                        onChangeHandler
+                                    }
+                                    value={
+                                        patchData.equipment
+                                    }
                                     name="equipment"
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
@@ -403,6 +589,12 @@ const ConstInputForm = () => {
                                     placeholder="전등선로공사"
                                     id="content"
                                     name="content"
+                                    onChange={
+                                        onChangeHandler
+                                    }
+                                    value={
+                                        patchData.content
+                                    }
                                     className="h-[140px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
                             </div>
@@ -414,9 +606,10 @@ const ConstInputForm = () => {
                 <div className="w-full flex justify-center">
                     <button
                         className="w-[160px] h-[35px] bg-point text-[#ffffff] rounded-[10px]
-                                        hover:drop-shadow-[4px_4px_10px_rgba(27,95,235,0.25)]"
+                                            hover:drop-shadow-[4px_4px_10px_rgba(27,95,235,0.25)]"
+                        type="submit"
                     >
-                        등록하기
+                        수정하기
                     </button>
                 </div>
             </form>
@@ -424,4 +617,4 @@ const ConstInputForm = () => {
     );
 };
 
-export default ConstInputForm;
+export default PatchDetail;

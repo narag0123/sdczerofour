@@ -3,18 +3,22 @@ import React from "react";
 
 type Props = {
     lastURL: string;
+    mode: string;
+    setMode: React.Dispatch<React.SetStateAction<string>>;
 };
 
-const BtnPatch: React.FC<Props> = ({ lastURL }) => {
+const BtnPatch: React.FC<Props> = ({
+    lastURL,
+    mode,
+    setMode,
+}) => {
     const router = useRouter();
 
     const handlePatch = async (
         e: React.MouseEvent<HTMLButtonElement>
     ) => {
         e.preventDefault();
-        router.push(
-            `http://localhost:3000/page/const-record/${lastURL}/patch`
-        );
+        setMode("patchMode");
     };
 
     return (

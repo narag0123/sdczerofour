@@ -54,9 +54,7 @@ const ConstRecordList = () => {
                 const pageData = await res.json();
                 setData(pageData.content);
                 setNumOfPages(pageData.totalPages);
-                console.log(pageData);
 
-                console.log(pageData.content);
                 setLoading(false);
             } catch (error) {
                 console.log(error);
@@ -135,7 +133,7 @@ const ConstRecordList = () => {
                     {!loading &&
                         data?.map((e) => (
                             <tr
-                                className="flex w-full text-center items-center mb-[40px]"
+                                className="flex w-full text-center items-center mb-[40px] cursor-pointer"
                                 key={e.id}
                                 onClick={() => {
                                     router.push(
@@ -186,11 +184,23 @@ const ConstRecordList = () => {
                 <div className="flex justify-center items-center gap-[10px] p-[10px] mt-[10px]">
                     {/* TODO: Page Index 만들기 */}
                     <span className="px-[5px]">{"<<"}</span>
-                    <span className="pr-[15px]">{"<"}</span>
+                    <span
+                        className="pr-[15px] cursor-pointer"
+                        onClick={() => {
+                            pageQuery > 1 &&
+                                setPageQuery(pageQuery - 1);
+                        }}
+                    >
+                        {"<"}
+                    </span>
                     {pageArr().map((e) => (
                         <div
                             key={e}
-                            className="cursor-pointer font-nl font-normal text-[18px]"
+                            className={`cursor-pointer font-nl  ${
+                                pageQuery === e + 1
+                                    ? "font-black text-[20px]"
+                                    : "font-normal text-[18px]"
+                            }`}
                             onClick={() => {
                                 setPageQuery(e + 1);
                             }}
@@ -198,7 +208,15 @@ const ConstRecordList = () => {
                             {e + 1}
                         </div>
                     ))}
-                    <span className="pl-[15px]">{">"}</span>
+                    <span
+                        className="pl-[15px] cursor-pointer"
+                        onClick={() => {
+                            pageQuery < numOfPages &&
+                                setPageQuery(pageQuery + 1);
+                        }}
+                    >
+                        {">"}
+                    </span>
                     <span className="px-[5px]">{">>"}</span>
                 </div>
             </div>
