@@ -4,7 +4,7 @@ import Image from "next/image";
 
 const Nav: React.FC = () => {
     return (
-        <div className="flex-[0.2] xl:w-[250px] h-[calc(100vh-130px)]">
+        <div className="flex-[0.2] min-w-[210px] h-[calc(100vh-130px)]">
             <div className="flex flex-col h-full justify-between">
                 <NavUnitItems />
                 <div

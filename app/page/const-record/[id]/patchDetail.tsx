@@ -8,32 +8,21 @@ import React, {
 } from "react";
 import Calendar from "react-calendar";
 // import "react-calendar/dist/Calendar.css"; // css import
-import { IntlProvider } from "react-intl";
+
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
-
-type getData = {
-    id: number;
-    writer: string;
-    dispatch: string;
-    region: string;
-    place: string;
-    placeDetail: string;
-    startDate: string;
-    startTime: string;
-    endDate: string;
-    endTime: string;
-    company: string;
-    commander: string;
-    workers: string;
-    equipment: string;
-    content: string;
-};
+import {
+    ConstFileTable,
+    ConstTable,
+    TData,
+} from "@/app/store/type/TFetchData";
 
 type Props = {
-    data?: getData;
+    data?: ConstFileTable | undefined;
+
     lastURL: string;
     setMode: React.Dispatch<React.SetStateAction<string>>;
+    isLoading: boolean;
 };
 
 type ValuePiece = Date | null;
@@ -43,21 +32,29 @@ const PatchDetail: React.FC<Props> = ({
     data,
     lastURL,
     setMode,
+    isLoading,
 }) => {
     const context = useContext(UseContext);
     const { tunnel } = context;
     const router = useRouter();
-    const [regionValue, setRegionValue] =
-        useState<string>("분당구");
+    const [regionValue, setRegionValue] = useState<string>(
+        data?.region == undefined ? "분당구" : data.region
+    );
     const [placeValue, setPlaceValue] = useState<string[]>([
-        "광장 지하차도",
+        data?.place == undefined
+            ? "광장 지하차도"
+            : data.place,
     ]);
 
     const [startDate, setStartDate] = useState<Value | any>(
-        new Date()
+        data === undefined
+            ? new Date()
+            : new Date(data?.startDate)
     );
     const [endDate, setEndDate] = useState<Value | any>(
-        new Date()
+        data === undefined
+            ? new Date()
+            : new Date(data?.endDate)
     );
     const [toggleCalendar, setToggleCalendar] = useState<{
         tgStd: boolean;
@@ -66,24 +63,15 @@ const PatchDetail: React.FC<Props> = ({
         tgStd: false,
         tgEnd: false,
     });
-    const [patchData, setPatchData] = useState<getData>({
-        id: parseInt(lastURL),
-        writer: "",
-        dispatch: "",
-        region: "",
-        place: "",
-        placeDetail: "",
-        startDate: "",
-        startTime: "",
-        endDate: "",
-        endTime: "",
-        company: "",
-        commander: "",
-        workers: "",
-        equipment: "",
-        content: "",
-    });
+    const [patchData, setPatchData] =
+        useState<ConstFileTable>(data as ConstFileTable);
 
+    useEffect(() => {
+        console.log(patchData);
+        console.log(data);
+    }, [data]);
+
+    // 지역변경
     useEffect(() => {
         const regionHandler = () => {
             const filteredTunnels = tunnel.filter(
@@ -97,28 +85,129 @@ const PatchDetail: React.FC<Props> = ({
             );
         };
         regionHandler();
-    }, [regionValue]);
-
-    const onChangeHandler = (
-        e: React.ChangeEvent<
-            | HTMLInputElement
-            | HTMLSelectElement
-            | HTMLTextAreaElement
-        >
-    ) => {
-        const { name, value } = e.target;
         setPatchData({
             ...patchData,
-            [name]: value,
+            place: placeValue[0],
             region: regionValue,
-            startDate: format(startDate, "yyyy-MM-dd"),
-            endDate: format(endDate, "yyyy-MM-dd"),
         });
+        console.log(regionValue);
+    }, [regionValue, placeValue]);
 
+    // TODO : 위치 변경 안하고 다른것만 변경하면 regionValue[0] 으로 변환됨
+    const onChangeHandler = (
+        e:
+            | React.ChangeEvent<HTMLInputElement>
+            | React.ChangeEvent<HTMLSelectElement>
+            | React.ChangeEvent<HTMLTextAreaElement>
+    ) => {
+        const { name, value, type } = e.target;
+
+        if (type === "file") {
+            // img input
+            const fileInput = e.target as HTMLInputElement;
+            const fileList = fileInput.files
+                ? Array.from(fileInput.files)
+                : [];
+
+            setPatchData({
+                ...patchData,
+                [name]: fileList,
+            });
+        } else {
+            // img 없음
+            setPatchData({
+                ...patchData,
+                [name]: value,
+                region: regionValue,
+            });
+        }
         console.log(patchData);
     };
+
+    // 날짜만 바꿔주기
+    useEffect(() => {
+        patchData !== undefined &&
+            setPatchData({
+                ...patchData,
+                startDate: format(startDate, "yyyy-MM-dd"),
+                endDate: format(endDate, "yyyy-MM-dd"),
+            });
+    }, [startDate, endDate]);
+
     const patchHandler = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const formData = new FormData();
+
+        if (patchData?.constFile !== undefined) {
+            if (patchData.constFile.length > 0) {
+                patchData.constFile.forEach((file) =>
+                    formData.append("constFile", file)
+                );
+            }
+        }
+
+        patchData.id !== undefined &&
+            formData.append("id", patchData.id.toString());
+
+        formData.append(
+            "writer",
+            patchData.writer.toString()
+        );
+        formData.append(
+            "dispatch",
+            patchData.dispatch.toString()
+        );
+        formData.append(
+            "place",
+            patchData.place.toString()
+        );
+        formData.append(
+            "placeDetail",
+            patchData.placeDetail.toString()
+        );
+        formData.append(
+            "startDate",
+            patchData.startDate.toString()
+        );
+
+        formData.append(
+            "startTime",
+            patchData.startTime.toString()
+        );
+        formData.append(
+            "endDate",
+            patchData.endDate.toString()
+        );
+
+        formData.append(
+            "endTime",
+            patchData.endTime.toString()
+        );
+        formData.append(
+            "company",
+            patchData.company.toString()
+        );
+        formData.append(
+            "commander",
+            patchData.commander.toString()
+        );
+        formData.append(
+            "workers",
+            patchData.workers.toString()
+        );
+        formData.append(
+            "equipment",
+            patchData.equipment.toString()
+        );
+        formData.append(
+            "content",
+            patchData.content.toString()
+        );
+        formData.append(
+            "region",
+            patchData.region.toString()
+        );
 
         const confirm =
             window.confirm("수정 하시겠습니까?");
@@ -128,14 +217,12 @@ const PatchDetail: React.FC<Props> = ({
                     `http://localhost:8081/api/v1/page/const-record/${lastURL}`,
                     {
                         method: "PATCH",
-                        headers: {
-                            "Content-Type":
-                                "application/json",
-                        },
-                        body: JSON.stringify(patchData),
+                        body: formData,
+                        mode: "cors",
                     }
                 );
                 const result = await res.json();
+                console.log(res);
 
                 if (res.ok) {
                     window.location.reload();
@@ -146,8 +233,6 @@ const PatchDetail: React.FC<Props> = ({
             }
         }
     };
-
-    // TODO : 모든 input과 selector patchData / patchHandler처리
 
     return (
         <>
@@ -184,7 +269,9 @@ const PatchDetail: React.FC<Props> = ({
                                     onChange={
                                         onChangeHandler
                                     }
-                                    value={patchData.writer}
+                                    value={
+                                        patchData?.writer
+                                    }
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
                             </div>
@@ -207,7 +294,7 @@ const PatchDetail: React.FC<Props> = ({
                                         onChangeHandler
                                     }
                                     value={
-                                        patchData.dispatch
+                                        patchData?.dispatch
                                     }
                                     name="dispatch"
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
@@ -230,9 +317,12 @@ const PatchDetail: React.FC<Props> = ({
                                         setRegionValue(
                                             e.target.value
                                         );
+                                        onChangeHandler(e);
                                     }}
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
-                                    defaultValue={"분당구"}
+                                    defaultValue={
+                                        regionValue
+                                    }
                                 >
                                     <option
                                         value={"분당구"}
@@ -303,7 +393,7 @@ const PatchDetail: React.FC<Props> = ({
                                     id="placeDetail"
                                     name="placeDetail"
                                     value={
-                                        patchData.placeDetail
+                                        patchData?.placeDetail
                                     }
                                     onChange={
                                         onChangeHandler
@@ -348,32 +438,26 @@ const PatchDetail: React.FC<Props> = ({
                                     className="cursor-pointer h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
 
-                                {/* TODO : 캘린더 숫자 클릭하면 다시 사라지게 */}
                                 {/* 캘린더 */}
                                 {toggleCalendar.tgStd && (
-                                    <div
-                                        onClick={() => {
-                                            setToggleCalendar(
-                                                {
-                                                    ...toggleCalendar,
-                                                    tgStd: !toggleCalendar.tgStd,
-                                                }
-                                            );
-                                        }}
-                                    >
-                                        <IntlProvider
-                                            locale={"en"}
-                                        >
-                                            <Calendar
-                                                locale="en"
-                                                onChange={
-                                                    setStartDate
-                                                }
-                                                value={
-                                                    startDate
-                                                }
-                                            />
-                                        </IntlProvider>
+                                    <div>
+                                        <Calendar
+                                            locale="en"
+                                            onChange={
+                                                setStartDate
+                                            }
+                                            value={
+                                                startDate
+                                            }
+                                            onClickDay={() => {
+                                                setToggleCalendar(
+                                                    {
+                                                        ...toggleCalendar,
+                                                        tgStd: !toggleCalendar.tgStd,
+                                                    }
+                                                );
+                                            }}
+                                        />
                                     </div>
                                 )}
                             </div>
@@ -385,14 +469,20 @@ const PatchDetail: React.FC<Props> = ({
                                     시작시간
                                 </label>
                                 <input
-                                    placeholder="08:00"
+                                    placeholder={
+                                        data?.startTime
+                                            ? data?.startTime
+                                            : "08:00"
+                                    }
                                     id="startTime"
                                     name="startTime"
                                     onChange={
                                         onChangeHandler
                                     }
                                     value={
-                                        patchData.startTime
+                                        patchData?.startTime
+                                            ? patchData?.startTime
+                                            : ""
                                     }
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
@@ -424,29 +514,22 @@ const PatchDetail: React.FC<Props> = ({
                                     className="cursor-pointer h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
                                 {toggleCalendar.tgEnd && (
-                                    <div
-                                        onClick={() => {
-                                            setToggleCalendar(
-                                                {
-                                                    ...toggleCalendar,
-                                                    tgEnd: !toggleCalendar.tgEnd,
-                                                }
-                                            );
-                                        }}
-                                    >
-                                        <IntlProvider
-                                            locale={"en"}
-                                        >
-                                            <Calendar
-                                                locale="en"
-                                                onChange={
-                                                    setEndDate
-                                                }
-                                                value={
-                                                    endDate
-                                                }
-                                            />
-                                        </IntlProvider>
+                                    <div>
+                                        <Calendar
+                                            locale="en"
+                                            onChange={
+                                                setEndDate
+                                            }
+                                            value={endDate}
+                                            onClickDay={() => {
+                                                setToggleCalendar(
+                                                    {
+                                                        ...toggleCalendar,
+                                                        tgEnd: !toggleCalendar.tgEnd,
+                                                    }
+                                                );
+                                            }}
+                                        />
                                     </div>
                                 )}
                             </div>
@@ -465,7 +548,9 @@ const PatchDetail: React.FC<Props> = ({
                                         onChangeHandler
                                     }
                                     value={
-                                        patchData.endTime
+                                        patchData?.endTime
+                                            ? patchData?.endTime
+                                            : ""
                                     }
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
@@ -490,14 +575,18 @@ const PatchDetail: React.FC<Props> = ({
                                     업체명
                                 </label>
                                 <input
-                                    placeholder="ABC 테크"
+                                    placeholder={
+                                        data?.company === ""
+                                            ? "예:ABC 테크"
+                                            : data?.company
+                                    }
                                     id="company"
                                     name="company"
                                     onChange={
                                         onChangeHandler
                                     }
                                     value={
-                                        patchData.company
+                                        patchData?.company
                                     }
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
@@ -510,14 +599,19 @@ const PatchDetail: React.FC<Props> = ({
                                     현장 책임자
                                 </label>
                                 <input
-                                    placeholder="김공사 과장 (010-1234-5678)"
+                                    placeholder={
+                                        data?.dispatch ===
+                                        ""
+                                            ? "예:김공사 과장 (010-1234-5678)"
+                                            : data?.dispatch
+                                    }
                                     id="commander"
                                     name="commander"
                                     onChange={
                                         onChangeHandler
                                     }
                                     value={
-                                        patchData.commander
+                                        patchData?.commander
                                     }
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
@@ -533,14 +627,19 @@ const PatchDetail: React.FC<Props> = ({
                                     작업 인원
                                 </label>
                                 <input
-                                    placeholder="3명"
+                                    placeholder={
+                                        data?.dispatch ===
+                                        ""
+                                            ? "예:3명"
+                                            : data?.dispatch
+                                    }
                                     id="workers"
                                     name="workers"
                                     onChange={
                                         onChangeHandler
                                     }
                                     value={
-                                        patchData.workers
+                                        patchData?.workers
                                     }
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
@@ -553,13 +652,18 @@ const PatchDetail: React.FC<Props> = ({
                                     투입장비
                                 </label>
                                 <input
-                                    placeholder="고소작업차 2대"
+                                    placeholder={
+                                        data?.dispatch ===
+                                        ""
+                                            ? "예:고소작업차 2대"
+                                            : data?.dispatch
+                                    }
                                     id="equipment"
                                     onChange={
                                         onChangeHandler
                                     }
                                     value={
-                                        patchData.equipment
+                                        patchData?.equipment
                                     }
                                     name="equipment"
                                     className="h-[40px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
@@ -593,9 +697,26 @@ const PatchDetail: React.FC<Props> = ({
                                         onChangeHandler
                                     }
                                     value={
-                                        patchData.content
+                                        patchData?.content
                                     }
                                     className="h-[140px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
+                                />
+                                <label
+                                    htmlFor="content"
+                                    className="text-[15px] font-bold"
+                                >
+                                    사진 첨부
+                                </label>
+                                <input
+                                    placeholder="사진을 첨부해 주세요"
+                                    type="file"
+                                    id="constFile"
+                                    name="constFile"
+                                    onChange={
+                                        onChangeHandler
+                                    }
+                                    multiple
+                                    className="h-[50px] p-[10px] focus:outline-[#000000] border-[0.5px] rounded-md"
                                 />
                             </div>
                         </div>

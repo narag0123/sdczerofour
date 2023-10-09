@@ -2,7 +2,7 @@ import Image from "next/image";
 import React from "react";
 import sdc_image from "public/asset/img/sdc_logo.png";
 
-function Header() {
+const Header = (): React.JSX.Element => {
     return (
         <div className="w-full h-[90px] flex justify-between items-end pb-[40px]">
             <div className="flex gap-[15px] items-end">
@@ -28,6 +28,6 @@ function Header() {
             </div>
         </div>
     );
-}
+};
 
 export default Header;

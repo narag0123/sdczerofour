@@ -1,3 +1,4 @@
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -12,11 +13,11 @@ const BtnPatch: React.FC<Props> = ({
     mode,
     setMode,
 }) => {
-    const router = useRouter();
+    const router: AppRouterInstance = useRouter();
 
     const handlePatch = async (
         e: React.MouseEvent<HTMLButtonElement>
-    ) => {
+    ): Promise<void> => {
         e.preventDefault();
         setMode("patchMode");
     };

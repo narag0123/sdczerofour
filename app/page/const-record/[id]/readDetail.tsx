@@ -1,25 +1,11 @@
+import {
+    ConstFileTable,
+    ConstTable,
+} from "@/app/store/type/TFetchData";
 import React from "react";
 
-interface getData {
-    id: number;
-    writer: string;
-    dispatch: string;
-    region: string;
-    place: string;
-    placeDetail: string;
-    startDate: string;
-    startTime: string;
-    endDate: string;
-    endTime: string;
-    company: string;
-    commander: string;
-    workers: string;
-    equipment: string;
-    content: string;
-}
-
 type Props = {
-    data?: getData;
+    data: ConstFileTable | undefined;
 };
 
 const ReadDetail: React.FC<Props> = ({ data }) => {
@@ -241,6 +227,44 @@ const ReadDetail: React.FC<Props> = ({ data }) => {
                             <div className="h-[40px] py-[0px] ">
                                 {data?.content}
                             </div>
+                            <label
+                                htmlFor="file"
+                                className="text-[15px] font-bold"
+                            >
+                                사진첨부
+                            </label>
+                            {data?.fileAttached === 0 ? (
+                                <div>사진 없음</div>
+                            ) : (
+                                <div
+                                    className="file w-full grid grid-cols-3 gap-[10px]"
+                                    id="file"
+                                >
+                                    {data?.storedFileName !==
+                                        undefined &&
+                                        data.storedFileName.map(
+                                            (e) => (
+                                                <React.Fragment
+                                                    key={e}
+                                                >
+                                                    <a
+                                                        href={`http://localhost:8081/img/${e}`}
+                                                        target="_blank"
+                                                    >
+                                                        <img
+                                                            className="w-[200px] h-[150px] object-cover rounded-xl"
+                                                            src={
+                                                                data &&
+                                                                `http://localhost:8081/img/${e}`
+                                                            }
+                                                            alt="이미지"
+                                                        />
+                                                    </a>
+                                                </React.Fragment>
+                                            )
+                                        )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

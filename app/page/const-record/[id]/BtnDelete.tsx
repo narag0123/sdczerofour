@@ -1,4 +1,5 @@
 "use client";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -6,28 +7,26 @@ type Props = {
     lastURL: string;
 };
 
-const BtnDelete = ({ lastURL }: Props) => {
-    const router = useRouter();
+const BtnDelete = ({
+    lastURL,
+}: Props): React.JSX.Element => {
+    const router: AppRouterInstance = useRouter();
 
     const handleDelete = async (
         e: React.MouseEvent<HTMLButtonElement>
-    ) => {
+    ): Promise<void> => {
         e.preventDefault();
 
-        const confirm = window.confirm(
+        const confirm: boolean = window.confirm(
             "해당 이벤트를 삭제 하시겠습니까?"
         );
 
         if (confirm) {
             try {
-                const res = await fetch(
+                const res: Response = await fetch(
                     `http://localhost:8081/api/v1/page/const-record/${lastURL}`,
                     {
                         method: "POST",
-                        headers: {
-                            "Content-Type":
-                                "application/json",
-                        },
                         mode: "cors",
                     }
                 );
@@ -45,6 +44,7 @@ const BtnDelete = ({ lastURL }: Props) => {
         }
     };
     return (
+        // TODO: color Highligt에서 아래 rgba해결
         <button
             className="px-[20px] py-[10px] h-fit bg-[#ff0000] text-[#ffffff] rounded-[10px]
                                         hover:drop-shadow-[4px_4px_10px_rgba(255,0,0,0.25)]

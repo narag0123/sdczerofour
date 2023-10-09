@@ -1,39 +1,38 @@
 "use client";
 import { usePathname } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, {
+    useContext,
+    useEffect,
+    useState,
+} from "react";
 import BtnDelete from "./BtnDelete";
 import BtnPatch from "./BtnPatch";
 import ReadDetail from "./readDetail";
 import PatchDetail from "./patchDetail";
-
-interface getData {
-    id: number;
-    writer: string;
-    dispatch: string;
-    region: string;
-    place: string;
-    placeDetail: string;
-    startDate: string;
-    startTime: string;
-    endDate: string;
-    endTime: string;
-    company: string;
-    commander: string;
-    workers: string;
-    equipment: string;
-    content: string;
-}
-
+import { UseContext } from "@/app/store/store";
+import { ConstFileTable } from "@/app/store/type/TFetchData";
+import { format } from "date-fns";
 const PageDetail: React.FC = () => {
-    const pathName = usePathname();
-    const lastURL =
+    const context = useContext(UseContext);
+    const { wherePage, setWherePage } = context;
+    const [isLoading, setIsLoading] =
+        useState<boolean>(false);
+    const pathName: string = usePathname();
+    const lastURL: string =
         pathName.split("/")[pathName.split("/").length - 1];
-    const [data, setData] = useState<getData | undefined>();
+    const [data, setData] = useState<
+        ConstFileTable | undefined
+    >();
     const [mode, setMode] = useState<string>("readMode");
 
     useEffect(() => {
-        const fetchData = async (url: string) => {
+        setWherePage("/page/const-record");
+        setIsLoading(true);
+        const fetchDetailData = async (
+            url: string
+        ): Promise<void> => {
             try {
+                console.log(data);
                 const res = await fetch(
                     `http://localhost:8081/api/v1/page/const-record/${lastURL}?lastURL=${lastURL}`,
                     {
@@ -45,17 +44,31 @@ const PageDetail: React.FC = () => {
                         mode: "cors",
                     }
                 );
+                const result = await res.json();
+                if (res.ok) {
+                    const newResult = {
+                        ...result,
+                        startTime:
+                            result.startTime === null
+                                ? ""
+                                : result.startTime,
+                        endTime:
+                            result.endTime === null
+                                ? ""
+                                : result.endTime,
+                    };
 
-                const pageData = await res.json();
-                setData(pageData);
+                    setData(newResult);
+                    console.log(data);
+                }
             } catch (error) {
                 console.log(error);
             }
+            setIsLoading(false);
         };
-        fetchData(lastURL);
+        fetchDetailData(lastURL);
     }, []);
 
-    // TODO - UPDATE기능도 만들기
     return (
         <main className="construction flex-[0.8] bg-[#ffffff] rounded-[20px] p-[40px] scrollbar h-[calc(100vh-130px)]">
             <div className="flex justify-between">
@@ -81,6 +94,7 @@ const PageDetail: React.FC = () => {
                     data={data}
                     lastURL={lastURL}
                     setMode={setMode}
+                    isLoading={isLoading}
                 />
             )}
         </main>

@@ -2,11 +2,7 @@
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import magnification from "public/asset/img/magnifyingglass.png";
-import {
-    usePathname,
-    useRouter,
-    useSearchParams,
-} from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
 
 interface Data {
@@ -25,35 +21,53 @@ interface Data {
     workers: string;
     equipment: string;
     content: string;
+    hits: number;
 }
 
-const ConstRecordList = () => {
+type TNumberOfPage = {
+    total: number;
+    quotient: number;
+    remainder: number;
+};
+
+// TODO : SEARCH FILTER 만들기
+const ConstRecordList = (): React.JSX.Element => {
     const [data, setData] = useState<Data[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [isFocused, setIsFocused] = useState(false);
-    const [pageQuery, setPageQuery] = useState<number>(1);
-    const [numOfPages, setNumOfPages] = useState<number>(1);
+
     const router: AppRouterInstance = useRouter();
+
+    const [pageArr, setPageArr] = useState<number[]>();
+    const [queryParams, setQueryParams] = useState({
+        page: 0,
+        size: 10,
+    });
+    const [pageInfo, setPageInfo] = useState<any>();
+
+    const fetchURL = `http://localhost:8081/api/v1/page/const-record?page=${queryParams.page}&size=${queryParams.size}`;
 
     useEffect(() => {
         setLoading(true);
-        const fetchData = async (
-            pageQuery: number
-        ): Promise<void> => {
+        const fetchData = async (): Promise<void> => {
             try {
-                const res = await fetch(
-                    `http://localhost:8081/api/v1/page/const-record?page=${pageQuery}`,
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type":
-                                "application/json",
-                        },
-                    }
+                const res = await fetch(fetchURL, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                const result = await res.json();
+                setData(result.content);
+                setPageInfo(result);
+                console.log(result);
+                console.log(pageInfo);
+
+                setPageArr(
+                    Array.from(
+                        Array(result.totalPages).keys()
+                    )
                 );
-                const pageData = await res.json();
-                setData(pageData.content);
-                setNumOfPages(pageData.totalPages);
 
                 setLoading(false);
             } catch (error) {
@@ -61,21 +75,92 @@ const ConstRecordList = () => {
             }
         };
 
-        fetchData(pageQuery - 1);
-    }, [pageQuery]);
+        fetchData();
+    }, [queryParams]);
 
-    const pageArr = (): number[] => {
-        let returnArr: number[] = [];
-        for (var i: number = 0; i < numOfPages; i++) {
-            returnArr.push(i);
+    const sendQueryHandler = (
+        dist: string,
+        e: number
+    ): void => {
+        // SIZE
+        if (dist === "size") {
+            setQueryParams({
+                ...queryParams,
+                size: e,
+            });
         }
-        return returnArr;
+
+        // PAGE
+        if (dist === "page") {
+            setQueryParams({
+                ...queryParams,
+                page: e,
+            });
+        }
     };
+
+    // 페이지 번호 생성 함수
+    // const pageArr = (e: number, tot: number) => {
+    //     const returnArr: number[] = [];
+    //     var j: number = Math.floor((e - 1) / 10) * 10;
+    //     var t: number = Math.floor(tot / 10) * 10;
+    //     var r: number = e % 10;
+    //     var fr: number = t % 10;
+
+    //     // 마지막 페이지 확인
+    //     if (j >= t) {
+    //         // 마지막 페이지
+    //         for (var i = j; i < tot; i++) {
+    //             returnArr.push(i);
+    //         }
+    //     } else {
+    //         // 마지막 페이지 아닌 나머지 페이지들
+    //         for (var i = j; i < j + 10; i++) {
+    //             returnArr.push(i);
+    //         }
+    //     }
+
+    //     return returnArr;
+    // };
+
+    // const fastForwardHandler = () => {
+    //     if (pageQuery % 10 === 0) {
+    //         // 10, 20, 30...인경우
+    //         setPageQuery(pageQuery + 1 - (pageQuery % 10));
+    //     } else if (
+    //         Math.floor(pageQuery / 10) ===
+    //         Math.floor(numOfPages.total / 10)
+    //     ) {
+    //         // 마지막 페이지인 경우
+    //         null;
+    //     } else if (pageQuery < numOfPages.total) {
+    //         // 일반적 경우
+    //         setPageQuery(pageQuery + 11 - (pageQuery % 10));
+    //     } else {
+    //         null;
+    //     }
+    // };
+
+    // const fastBackwardHandler = () => {
+    //     if (pageQuery % 10 === 0 && pageQuery !== 10) {
+    //         // 20, 30...인경우
+    //         setPageQuery(pageQuery - (pageQuery % 10) - 19);
+    //     } else if (pageQuery <= 10) {
+    //         // 1~10인경우
+    //         setPageQuery(1);
+    //     } else {
+    //         // 그외 일반적 경우
+    //         pageQuery > 1 &&
+    //             setPageQuery(
+    //                 pageQuery - (pageQuery % 10) - 9
+    //             );
+    //     }
+    // };
 
     return (
         <div>
             {/* 검색 바 */}
-            <div className="search-bar w-full h-[60px] bg-[#ededed] rounded-[10px] p-[10px] mb-[25px]">
+            <div className="search-bar w-full h-[60px] bg-[#ededed] rounded-[10px] p-[10px] mb-[25px] flex justify-between">
                 <div
                     onFocus={() => {
                         setIsFocused(true);
@@ -100,6 +185,35 @@ const ConstRecordList = () => {
                         focus:outline-none "
                     />
                 </div>
+                <select
+                    className="text-[12px] font-nl font-normal p-3 rounded-sm"
+                    defaultValue={10}
+                    onChange={(e) => {
+                        sendQueryHandler(
+                            "size",
+                            Number(e.target.value)
+                        );
+                    }}
+                >
+                    <option
+                        className="text-[12px]"
+                        value={5}
+                    >
+                        5개씩 보기
+                    </option>
+                    <option
+                        className="text-[12px]"
+                        value={10}
+                    >
+                        10개씩 보기
+                    </option>
+                    <option
+                        className="text-[12px]"
+                        value={20}
+                    >
+                        20개씩 보기
+                    </option>
+                </select>
             </div>
 
             {/* 표 데이터 */}
@@ -148,8 +262,8 @@ const ConstRecordList = () => {
                                     <p>
                                         {e.startDate?.toString()}{" "}
                                     </p>
-                                    {e.startDate.toString() !==
-                                        e.endDate && (
+                                    {e.startDate?.toString() !==
+                                        e?.endDate && (
                                         <p>
                                             {e.endDate?.toString()}
                                         </p>
@@ -181,43 +295,58 @@ const ConstRecordList = () => {
             {/* 페이지 인덱스 */}
             <div>
                 <hr className="border-[#000000]" />
-                <div className="flex justify-center items-center gap-[10px] p-[10px] mt-[10px]">
-                    {/* TODO: Page Index 만들기 */}
-                    <span className="px-[5px]">{"<<"}</span>
+                <div className="flex justify-center items-center gap-[20px] p-[10px] mt-[10px]">
+                    <span className="px-[5px] cursor-pointer">
+                        {"<<"}
+                    </span>
                     <span
                         className="pr-[15px] cursor-pointer"
                         onClick={() => {
-                            pageQuery > 1 &&
-                                setPageQuery(pageQuery - 1);
+                            !pageInfo?.first &&
+                                sendQueryHandler(
+                                    "page",
+                                    queryParams.page - 1
+                                );
                         }}
                     >
                         {"<"}
                     </span>
-                    {pageArr().map((e) => (
-                        <div
+
+                    {pageArr?.map((e) => (
+                        <button
                             key={e}
-                            className={`cursor-pointer font-nl  ${
-                                pageQuery === e + 1
-                                    ? "font-black text-[20px]"
-                                    : "font-normal text-[18px]"
-                            }`}
+                            className={`cursor-pointer font-nl font-normal`}
                             onClick={() => {
-                                setPageQuery(e + 1);
+                                sendQueryHandler("page", e);
                             }}
                         >
                             {e + 1}
-                        </div>
+                        </button>
                     ))}
                     <span
                         className="pl-[15px] cursor-pointer"
                         onClick={() => {
-                            pageQuery < numOfPages &&
-                                setPageQuery(pageQuery + 1);
+                            !pageInfo?.last &&
+                                sendQueryHandler(
+                                    "page",
+                                    queryParams.page + 1
+                                );
                         }}
                     >
                         {">"}
                     </span>
-                    <span className="px-[5px]">{">>"}</span>
+                    <span
+                        className="px-[5px] cursor-pointer"
+                        onClick={() => {
+                            !pageInfo?.last &&
+                                sendQueryHandler(
+                                    "page",
+                                    queryParams.page + 10
+                                );
+                        }}
+                    >
+                        {">>"}
+                    </span>
                 </div>
             </div>
         </div>

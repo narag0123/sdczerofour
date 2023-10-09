@@ -1,27 +1,32 @@
 {
-    "name": "sdc-dashboard",
-    "version": "0.1.0",
-    "private": true,
-    "scripts": {
-        "dev": "next dev",
-        "build": "next build",
-        "start": "next start",
-        "lint": "next lint"
-    },
-    "dependencies": {
-        "@types/node": "20.5.7",
-        "@types/react": "18.2.21",
-        "@types/react-dom": "18.2.7",
-        "autoprefixer": "10.4.15",
-        "date-fns": "^2.30.0",
-        "framer-motion": "^10.16.1",
-        "next": "13.4.19",
-        "postcss": "8.4.28",
-        "react": "18.2.0",
-        "react-calendar": "^4.6.0",
-        "react-dom": "18.2.0",
-        "react-intl": "^6.4.4",
-        "tailwindcss": "3.3.3",
-        "typescript": "5.2.2"
-    }
+  "name": "sdc-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@fullcalendar/core": "^6.1.9",
+    "@fullcalendar/daygrid": "^6.1.9",
+    "@fullcalendar/interaction": "^6.1.9",
+    "@fullcalendar/react": "^6.1.9",
+    "@fullcalendar/timegrid": "^6.1.9",
+    "@types/node": "20.5.7",
+    "@types/react": "18.2.21",
+    "@types/react-dom": "18.2.7",
+    "autoprefixer": "10.4.15",
+    "date-fns": "^2.30.0",
+    "framer-motion": "^10.16.1",
+    "next": "13.4.19",
+    "postcss": "8.4.28",
+    "react": "18.2.0",
+    "react-calendar": "^4.6.0",
+    "react-dom": "18.2.0",
+    "react-intl": "^6.4.4",
+    "tailwindcss": "3.3.3",
+    "typescript": "5.2.2"
+  }
 }
