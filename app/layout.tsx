@@ -2,7 +2,10 @@ import "./globals.css";
 import type { Metadata } from "next";
 import Header from "./nav/header";
 import Nav from "./nav/nav";
-import UseProvider, { UseContext } from "./store/store";
+import UseProvider, {
+    UseContext,
+} from "./store/context/store";
+import LoginComponent from "./page/authenticate/login/page";
 
 export const metadata: Metadata = {
     title: "공사공사",
